@@ -6,11 +6,15 @@ using Microsoft.Data.SqlClient;
 
 namespace ElementarySchool.Services
 {
-    public class AttendanceService(DatabaseConnection dbConnection)
+    public class AttendanceService
     {
-        private readonly DatabaseConnection db = dbConnection;
+        private readonly DatabaseConnection dbConnection;
 
-        #region GetAllStudents
+        public AttendanceService(DatabaseConnection dbConn)
+        {
+            dbConnection = dbConn;
+        }
+
         public List<Student> GetAllStudents()
         {
             try
@@ -23,14 +27,14 @@ namespace ElementarySchool.Services
                     Student student = new Student
                     (
                         (int)row["StudentID"],
-                        row["FirstName"].ToString(),
-                        row["FatherName"].ToString(),
-                        row["LastName"].ToString(),
-                        row["Gender"].ToString(),
+                        row["FirstName"]?.ToString() ?? string.Empty,
+                        row["FatherName"]?.ToString() ?? string.Empty,
+                        row["LastName"]?.ToString() ?? string.Empty,
+                        row["Gender"]?.ToString() ?? string.Empty,
                         (DateTime)row["Birthdate"],
-                        row["Address"].ToString(),
-                        row["PhoneNo"].ToString(),
-                        row["Email"].ToString(),
+                        row["Address"]?.ToString() ?? string.Empty,
+                        row["PhoneNo"]?.ToString() ?? string.Empty,
+                        row["Email"]?.ToString() ?? string.Empty,
                         (DateTime)row["EnrollmentDate"],
                         (bool)row["IsActive"]
                     );
@@ -44,7 +48,8 @@ namespace ElementarySchool.Services
                 throw;
             }
         }
-        #endregion
+
+
 
     }
 }

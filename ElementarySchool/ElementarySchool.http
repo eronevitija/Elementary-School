@@ -1,6 +1,24 @@
-@ElementarySchool_HostAddress = http://localhost:5216
+# @ElementarySchool_HostAddress = http://localhost:8070
 
-GET {{ElementarySchool_HostAddress}}/api/students
+# GET {{ElementarySchool_HostAddress}}/api/home
+# Accept: application/json
+
+# ###
+
+@baseUrl = http://localhost:5000
+
+GET {{baseUrl}}/api/Students
 Accept: application/json
 
-###
+
+
+# ### get student by id
+GET {{baseUrl}}/api/Students/1
+Accept: application/json
+
+
+
+
+
+
+ 

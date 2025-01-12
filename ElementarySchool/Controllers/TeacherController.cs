@@ -1,83 +1,77 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using ElementarySchool.Models;
+using ElementarySchool.Services;
+using System.Collections;
+using System.Linq;
+using System.Collections.Generic;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ElementarySchool.Controllers
 {
-    public class TeacherController : Controller
+    [ApiController]
+    [Route("api/[controller]")]
+    public class TeacherController : ControllerBase
     {
-        // GET: TeacherController
-        public ActionResult Index()
+        private readonly TeacherService teacherService;
+
+        public TeacherController(TeacherService tService)
         {
-            return View();
+           teacherService = tService;
+        }
+        // GET: TeacherController
+        [HttpGet]
+        public ActionResult<IEnumerable<Teacher>> GetTeachers() 
+        {
+            var teachers = teacherService.GetAllTeachers();
+            return Ok(teachers);
         }
 
         // GET: TeacherController/Details/5
-        public ActionResult Details(int id)
+        [HttpGet("{id}")]
+        public ActionResult GetTeacherById(int id)
         {
-            return View();
+            var teacher = teacherService.GetTeacherByID(id);
+            if (teacher == null)
+
+                return NotFound();
+            return Ok(teacher);
         }
 
         // GET: TeacherController/Create
-        public ActionResult Create()
+        [HttpPost]
+        public ActionResult<Teacher> InsertTeacher([FromBody] Teacher teacher)
         {
-            return View();
+            if (!ModelState.IsValid)
+
+                return BadRequest(ModelState);
+
+            teacherService.InsertTeacher(teacher);
+            return CreatedAtAction(nameof(GetTeacherById), new { id = teacher.TeacherID }, teacher);
+
         }
 
-        // POST: TeacherController/Create
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
-        {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
-        }
 
         // GET: TeacherController/Edit/5
-        public ActionResult Edit(int id)
+        [HttpPut]
+        public ActionResult Edit(int id, [FromBody] Teacher teacher)
         {
-            return View();
+            if (id != teacher.TeacherID)
+                return BadRequest();
+
+            teacherService.EditTeacher(teacher);
+            return NoContent();
         }
 
-        // POST: TeacherController/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
-        {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
-        }
 
-        // GET: TeacherController/Delete/5
-        public ActionResult Delete(int id)
-        {
-            return View();
-        }
 
         // POST: TeacherController/Delete/5
-        [HttpPost]
+        [HttpDelete("{id}")]
         [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
+        public ActionResult Delete(int id)
         {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
+            teacherService.DeleteTeacher(id);
+            return NoContent();
         }
     }
 }

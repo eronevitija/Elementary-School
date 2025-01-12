@@ -2,41 +2,61 @@
 using ElementarySchool.Models;
 using System.Collections.Generic;
 using Microsoft.Data.SqlClient;
+using ElementarySchool.Data;
 
 
 namespace ElementarySchool.Services
-{                           //this is primary constructor, which is used in C# 9 or higher.
-    public class StudentService(DatabaseConnection dbConn)
+{                           
+    public class StudentService
     {
-       private readonly DatabaseConnection dbConnection = dbConn;
+        private readonly string connString;
+        private readonly DatabaseConnection dbConnection;
 
+        public StudentService(IConfiguration config, DatabaseConnection dbConn)
+        {
+            connString = config.GetConnectionString("ElementarySchoolContext")
+                ?? throw new ArgumentException("Connection string 'Elementary School Context' not found.");
+            dbConnection = dbConn ?? throw new ArgumentException(nameof(dbConn));
+        }
+
+        public string GetConnectionString() 
+        {
+            return connString;
+        }
         public List<Student> GetAllStudents()
         {
             try
             {
-                List<Student> st = new List<Student>();
+                List<Student> students = new List<Student>();
+                DataTable dt = new DataTable();
 
-                DataTable dt = dbConnection.ExecStoredProcedure("usp_ShowStudentList");
-                foreach (DataRow row in dt.Rows)
+                using (SqlConnection sqlConn = dbConnection.GetSqlConnection())
                 {
-                    Student student = new Student
-                    (
-                        (int)row["StudentID"],
-                        row["FirstName"].ToString(),
-                        row["FatherName"].ToString(),
-                        row["LastName"].ToString(),
-                        row["Gender"].ToString(),
-                        (DateTime)row["Birthdate"],
-                        row["Address"].ToString(),
-                        row["PhoneNo"].ToString(),
-                        row["Email"].ToString(),
-                        (DateTime)row["EnrollmentDate"],
-                        (bool)row["IsActive"]
-                    );
-                    st.Add(student);
+                    sqlConn.Open();
+                    SqlDataAdapter sqlDataAdapter = new SqlDataAdapter("usp_ShowStudentList",sqlConn);
+                    sqlDataAdapter.Fill(dt);
 
-                }
-                return st;
+                    foreach (DataRow row in dt.Rows)
+                    {
+                       
+                        Student student = new Student
+                        (
+                            studentID: Convert.ToInt32(row["StudentID"]),
+                            firstName: row["FirstName"]?.ToString() ?? string.Empty,
+                            fatherName: row["FatherName"]?.ToString() ?? string.Empty,
+                            lastName: row["LastName"]?.ToString() ?? string.Empty,
+                            gender: row["Gender"]?.ToString() ?? string.Empty,
+                            birthdate: row["Birthdate"] == DBNull.Value ? null : DateTime.Parse(row["Birthdate"].ToString()),
+                            address: row["Address"]?.ToString() ?? string.Empty,
+                            phoneNo: row["PhoneNo"]?.ToString() ?? string.Empty,
+                            email: row["Email"]?.ToString() ?? string.Empty,
+                            enrollmentDate: row["Birthdate"] == DBNull.Value ? null : DateTime.Parse(row["Birthdate"].ToString()),
+                            isActive: row["IsActive"] != DBNull.Value && Convert.ToBoolean(row["IsActive"])
+                        );
+                        students.Add(student);
+                    }
+                    }
+                return students;
             }
             catch (Exception)
             {
@@ -105,7 +125,6 @@ namespace ElementarySchool.Services
             }
         }
 
-
         public void DeleteStudent(int? studentID)
         {
             try
@@ -132,6 +151,8 @@ namespace ElementarySchool.Services
 
         public Student GetStudentByID(int stID)
         {
+            DataSet ds;
+            Student st;
             try
             {
                 using (SqlConnection sqlConn = dbConnection.GetSqlConnection())
@@ -146,27 +167,24 @@ namespace ElementarySchool.Services
                             DataTable dt = new DataTable();
                             sqlDataAdapter.Fill(dt);
 
-                            if (dt.Rows.Count == 0)
-                            {
-                                return null;
-                            }
-                            DataRow row = dt.Rows[0];
-                            
-                            int studentID = Convert.ToInt32(row["StudentID"]);
-                            string firstName = row["FirstName"] != DBNull.Value ? Convert.ToString(row["FirstName"]) : string.Empty;
-                            string fatherName = row["FatherName"] != DBNull.Value ? Convert.ToString(row["FatherName"]) : string.Empty;
-                            string lastName = row["LastName"] != DBNull.Value ? Convert.ToString(row["LastName"]) : string.Empty;
-                            string gender = row["Gender"] != DBNull.Value ? Convert.ToString(row["Gender"]) : string.Empty;
-                            DateTime birthdate = row["Birthdate"] != DBNull.Value ? Convert.ToDateTime(row["FirstName"]) : DateTime.MinValue;
-                            string address = row["Address"] != DBNull.Value ? Convert.ToString(row["FirstName"]) : string.Empty;
-                            string phoneNo = row["PhoneNo"] != DBNull.Value ? Convert.ToString(row["FirstName"]) : string.Empty;
-                            string email = row["Email"] != DBNull.Value ? Convert.ToString(row["FirstName"]) : string.Empty;
-                            DateTime enrollmentDate = row["EnrollmentDate"] != DBNull.Value ? Convert.ToDateTime(row["FirstName"]) : DateTime.MinValue;
-                            bool isActive = row["IsActive"] != DBNull.Value ? Convert.ToBoolean(row["FirstName"]) : false;
-                            Student st = new Student(studentID, firstName, fatherName, lastName,
-                                gender, Convert.ToDateTime(birthdate), address, phoneNo, email, enrollmentDate, isActive);
+                            ds = new DataSet();
+                            sqlDataAdapter.Fill(ds);
+                            string studentIDValue = Convert.ToString((ds.Tables[0].Rows[0]["StudentID"])) as string ?? string.Empty;
+                            string firstName = Convert.ToString((ds.Tables[0].Rows[0]["FirstName"])) as string ?? string.Empty;
+                            string fatherName = Convert.ToString((ds.Tables[0].Rows[0]["FatherName"])) as string ?? string.Empty;
+                            string lastName = Convert.ToString((ds.Tables[0].Rows[0]["LastName"])) as string ?? string.Empty;
+                            string gender = Convert.ToString((ds.Tables[0].Rows[0]["Gender"])) as string ?? string.Empty;
+                            string birthdate = Convert.ToString((ds.Tables[0].Rows[0]["Birthdate"])) as string ?? string.Empty;
+                            string address = Convert.ToString((ds.Tables[0].Rows[0]["Address"])) as string ?? string.Empty;
+                            string phoneNo = Convert.ToString((ds.Tables[0].Rows[0]["PhoneNo"])) as string ?? string.Empty;
+                            string email = Convert.ToString((ds.Tables[0].Rows[0]["Email"])) as string ?? string.Empty;
+                            string enrollmentDate = Convert.ToString((ds.Tables[0].Rows[0]["EnrollmentDate"])) as string ?? string.Empty;
+                            string isActive = Convert.ToString((ds.Tables[0].Rows[0]["IsActive"])) as string ?? string.Empty;
 
-                            return st;
+                            st = new Student(Int32.Parse(studentIDValue), firstName,fatherName,
+                                lastName,gender,DateTime.Parse(birthdate),address, phoneNo,email,DateTime.Parse(enrollmentDate),
+                                Boolean.Parse(isActive));
+
                         }
                     }
                 }
@@ -175,6 +193,7 @@ namespace ElementarySchool.Services
             {
                 throw;
             }
+            return st;
         }
 
     }

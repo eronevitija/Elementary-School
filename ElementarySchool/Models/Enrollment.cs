@@ -6,6 +6,7 @@ namespace ElementarySchool.Models
     {
         public int EnrollmentID { get; set; }
 
+        [Required(ErrorMessage ="EnrollmentDate is required")]
         public DateTime EnrollmentDate { get; set; }
 
         public int StudentID { get; set; }

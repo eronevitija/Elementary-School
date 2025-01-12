@@ -20,7 +20,7 @@ namespace ElementarySchool.Services
                         Subject subject = new Subject
                         (
                             (int)row["SubjectID"],
-                            row["Title"].ToString(),
+                            row["Title"]?.ToString() ?? string.Empty,
                             (int)row["StudentID"],
                             (int)row["TeacherID"]
                         );
@@ -110,6 +110,8 @@ namespace ElementarySchool.Services
 
         public Subject GetSubjectByID(int subjectID)
         {
+            DataSet ds;
+            Subject subject;
             try
             {
                 using (SqlConnection sqlConn = dbConnection.GetSqlConnection())
@@ -121,22 +123,14 @@ namespace ElementarySchool.Services
                         sqlCmd.Parameters.AddWithValue("@ID", subjectID);
                         using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCmd))
                         {
-                            DataTable dt = new DataTable();
-                            sqlDataAdapter.Fill(dt);
+                            ds = new DataSet();
+                            sqlDataAdapter.Fill(ds);
+                            string subjectIDValue = Convert.ToString((ds.Tables[0].Rows[0]["SubjectID"])) as string ?? string.Empty;
+                            string title = Convert.ToString((ds.Tables[0].Rows[0]["Title"])) as string ?? string.Empty;
+                            string studentID = Convert.ToString((ds.Tables[0].Rows[0]["StudentID"])) as string ?? string.Empty;
+                            string teacherID = Convert.ToString((ds.Tables[0].Rows[0]["TeacherID"])) as string ?? string.Empty;
 
-                            if (dt.Rows.Count == 0)
-                            {
-                                return null;
-                            }
-                            DataRow row = dt.Rows[0];
-
-                            int subjectsID = Convert.ToInt32(row["SubjectID"]);
-                            string title = row["Title"] != DBNull.Value ? Convert.ToString(row["Title"]) : string.Empty;
-                            int studentID = Convert.ToInt32(row["StudentID"]);
-                            int teacherID = Convert.ToInt32(row["TeacherID"]);
-
-                            Subject obj = new Subject(subjectsID, title, studentID,teacherID);
-                            return obj;
+                            subject = new Subject(Int32.Parse(subjectIDValue), title, Int32.Parse(studentID),Int32.Parse(teacherID));
                         }
                     }
                 }
@@ -145,6 +139,7 @@ namespace ElementarySchool.Services
             {
                 throw;
             }
+            return subject;
         }
 
 

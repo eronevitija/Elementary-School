@@ -18,20 +18,24 @@ namespace ElementarySchool.Models
         [Required(ErrorMessage = "Gender is required")]
         public string Gender { get; set; }
 
-        public DateTime Birthdate { get; set; }
+        [Required(ErrorMessage = "Birthdate is required")]
+        public DateTime? Birthdate { get; set; }
+        [Required(ErrorMessage = "Address is required")]
         public string Address { get; set; }
+        [Required(ErrorMessage = "PhoneNo is required")]
         public string PhoneNo { get; set; }
+        [Required(ErrorMessage = "Email is required")]
         public string Email { get; set; }
 
         [Required(ErrorMessage = "EnrollmentDate is required")]
-        public DateTime EnrollmentDate { get; set; }
+        public DateTime? EnrollmentDate { get; set; }
 
         [Required(ErrorMessage ="IsActive is required")]
         public bool IsActive { get; set; }
 
 
         public Student(int studentID, string firstName, string fatherName,string lastName, string gender,
-            DateTime birthdate, string address ,string phoneNo, string email, DateTime enrollmentDate, bool isActive)
+            DateTime? birthdate, string address ,string phoneNo, string email, DateTime? enrollmentDate, bool isActive)
         {
             StudentID = studentID;
             FirstName = firstName;

@@ -110,6 +110,8 @@ namespace ElementarySchool.Services
 
         public Grades GetGradeByID(int gradeID)
         {
+            DataSet ds;
+            Grades grade;
             try
             {
                 using (SqlConnection sqlConn = dbConnection.GetSqlConnection())
@@ -121,23 +123,15 @@ namespace ElementarySchool.Services
                         sqlCmd.Parameters.AddWithValue("@ID", gradeID);
                         using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCmd))
                         {
-                            DataTable dt = new DataTable();
-                            sqlDataAdapter.Fill(dt);
+                            ds = new DataSet();
+                            sqlDataAdapter.Fill(ds);
+                            string gradeIDValue = Convert.ToString((ds.Tables[0].Rows[0]["GradeID"])) as string ?? string.Empty;
+                            string subjectID = Convert.ToString((ds.Tables[0].Rows[0]["SubjectID"])) as string ?? string.Empty;
+                            string studentID = Convert.ToString((ds.Tables[0].Rows[0]["StudentID"])) as string ?? string.Empty;
+                            string studentGrade = Convert.ToString((ds.Tables[0].Rows[0]["Grade"])) as string ?? string.Empty;
 
-                            if (dt.Rows.Count == 0)
-                            {
-                                return null;
-                            }
-                            DataRow row = dt.Rows[0];
-
-                            int gradesID = Convert.ToInt32(row["GradeID"]);
-                            int subjectID = Convert.ToInt32(row["SubjectID"]);
-                            int studentID = Convert.ToInt32(row["StudentID"]);
-                            char gradeChar = Convert.ToChar(row["Grade"]);
-
-                            Grades grade = new Grades(gradesID, subjectID, studentID, gradeChar);
-
-                            return grade;
+                            grade = new Grades(Int32.Parse(gradeIDValue), Int32.Parse(subjectID), 
+                                Int32.Parse(studentID), Char.Parse(studentGrade));
                         }
                     }
                 }
@@ -146,6 +140,7 @@ namespace ElementarySchool.Services
             {
                 throw;
             }
+            return grade;
         }
     }
 }

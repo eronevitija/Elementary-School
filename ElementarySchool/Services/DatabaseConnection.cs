@@ -5,20 +5,33 @@ using System.Web;
 
 namespace ElementarySchool.Services
 {
-    public class DatabaseConnection(string connString)
+    public class DatabaseConnection
     {
-        private readonly string connectionString = connString;
+        private readonly string connectionString;
+        private readonly IConfiguration configuration;
 
+        public DatabaseConnection(IConfiguration config)
+        {
+            configuration = config;
+            connectionString = configuration.GetConnectionString("ElementarySchoolContext") ?? string.Empty;
+        }
 
         public SqlConnection GetSqlConnection()
         {
-            return new SqlConnection(connectionString);
+            try
+            {
+                SqlConnection sqlConn = new SqlConnection(connectionString);
+                return sqlConn;
+            }
+            catch (Exception e)
+            {
+                throw new Exception("Failed to create database connection" + e);
+            }
         }
 
 
         public DataTable ExecStoredProcedure(string storedProcedureName)
         {
-            DataTable dt = new DataTable();
             using (SqlConnection sqlConn = GetSqlConnection())
             {
                 try
@@ -29,16 +42,18 @@ namespace ElementarySchool.Services
                         sqlCmd.CommandType = CommandType.StoredProcedure;
                         using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCmd))
                         {
+                            DataTable dt = new DataTable();
                             sqlDataAdapter.Fill(dt);
+                            return dt;
                         }
                     }
                 }
-                catch (Exception)
+                catch (Exception e)
                 {
-                    throw;
+
+                    throw new Exception("Error executing stored procedure" + e);
                 }
             }
-            return dt;
         }
 
 

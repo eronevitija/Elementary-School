@@ -5,9 +5,14 @@ using Microsoft.Data.SqlClient;
 
 namespace ElementarySchool.Services
 {
-    public class ClassService(DatabaseConnection dbConnection)
+    public class ClassService
     {
+        private DatabaseConnection dbConnection;
 
+        public ClassService(DatabaseConnection dbConnection)
+        {
+            this.dbConnection = dbConnection;
+        }
         public List<Class> GetAllClasses()
         {
             try
@@ -20,7 +25,7 @@ namespace ElementarySchool.Services
                     Class classObj = new Class
                     (
                         (int)row["ClassID"],
-                        row["Title"].ToString(),
+                        row["Title"]?.ToString() ?? string.Empty,
                         (int)row["TeacherID"]
                     );
                     c.Add(classObj);
@@ -109,6 +114,8 @@ namespace ElementarySchool.Services
 
         public Class GetClassByID(int classID)
         {
+            DataSet ds;
+            Class obj;
             try
             {
                 using (SqlConnection sqlConn = dbConnection.GetSqlConnection())
@@ -120,22 +127,13 @@ namespace ElementarySchool.Services
                         sqlCmd.Parameters.AddWithValue("@ID", classID);
                         using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCmd))
                         {
-                            DataTable dt = new DataTable();
-                            sqlDataAdapter.Fill(dt);
+                            ds = new DataSet(); 
+                            sqlDataAdapter.Fill(ds);
+                            string classIDValue = Convert.ToString((ds.Tables[0].Rows[0]["ClassID"])) as string ?? string.Empty;
+                            string title = Convert.ToString((ds.Tables[0].Rows[0]["Title"])) as string ?? string.Empty;
+                            string teacherID = Convert.ToString((ds.Tables[0].Rows[0]["TeacherID"])) as string ?? string.Empty;
 
-                            if (dt.Rows.Count == 0)
-                            {
-                                return null;
-                            }
-                            DataRow row = dt.Rows[0];
-
-                            int classesID = Convert.ToInt32(row["ClassID"]);
-                            string title = row["Title"].ToString();
-                            int teacherID = Convert.ToInt32(row["TeacherID"]);
-
-                            Class obj = new Class(classesID, title, teacherID);
-
-                            return obj;
+                             obj = new Class(Int32.Parse(classIDValue),title,Int32.Parse(teacherID));
                         }
                     }
                 }
@@ -144,6 +142,7 @@ namespace ElementarySchool.Services
             {
                 throw;
             }
+            return obj;
         }
 
 

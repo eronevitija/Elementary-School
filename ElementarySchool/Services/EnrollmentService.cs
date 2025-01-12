@@ -116,8 +116,11 @@ namespace ElementarySchool.Services
         }
 
 
-        public Enrollment GetEnrollment(int enID)
+        public Enrollment GetEnrollmentById(int enID)
         {
+            DataSet ds;
+            Enrollment enrollment;
+
             try
             {
                 using (SqlConnection sqlConn = dbConnection.GetSqlConnection())
@@ -129,26 +132,17 @@ namespace ElementarySchool.Services
                         sqlCmd.Parameters.AddWithValue("@ID", enID);
                         using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCmd))
                         {
-                            DataTable dt = new DataTable();
-                            sqlDataAdapter.Fill(dt);
+                            ds = new DataSet();
+                            sqlDataAdapter.Fill(ds);
+                            string enrollmentIDValue = Convert.ToString((ds.Tables[0].Rows[0]["EnrollmentID"])) as string ?? string.Empty;
+                            string enrollmentDate = Convert.ToString((ds.Tables[0].Rows[0]["EnrollmentDate"])) as string ?? string.Empty;
+                            string studentID = Convert.ToString((ds.Tables[0].Rows[0]["StudentID"])) as string ?? string.Empty;
+                            string classID = Convert.ToString((ds.Tables[0].Rows[0]["ClassID"])) as string ?? string.Empty;
 
-                            if (dt.Rows.Count == 0)
-                            {
-                                return null;
-                            }
-                            DataRow row = dt.Rows[0];
-
-                            int enrollmentID = Convert.ToInt32(row["EnrollmentID"]);
-                            DateTime enrollmentDate = Convert.ToDateTime(row["EnrollmentDate"]);
-                            int studentID = Convert.ToInt32(row["StudentID"]);
-                            int classID = Convert.ToInt32(row["ClassID"]);
-
-                            Enrollment en = new Enrollment(enrollmentID, Convert.ToDateTime(enrollmentDate), studentID, classID);
-                            return en;
+                            enrollment = new Enrollment(Int32.Parse(enrollmentIDValue), DateTime.Parse(enrollmentDate),
+                                Int32.Parse(studentID), Int32.Parse(classID));
                         }
-
                     }
-
                 }
 
             }
@@ -157,6 +151,8 @@ namespace ElementarySchool.Services
 
                 throw;
             }
+
+            return enrollment;
         }
 
     }

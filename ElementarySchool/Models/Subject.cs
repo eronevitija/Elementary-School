@@ -3,6 +3,7 @@
     public class Subject
     {
         public int SubjectID { get; set; }
+        
         public string Title { get; set; }
         public int StudentID { get; set; }
         public int TeacherID { get; set; }
