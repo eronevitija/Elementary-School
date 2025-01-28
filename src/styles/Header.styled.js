@@ -6,7 +6,6 @@ export const ProjectName = styled.div`
     font-weight:bold;
     padding-left:20px;
     color:#333;
-    
 `;
 
 export const StyledHeader = styled.header`

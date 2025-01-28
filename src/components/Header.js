@@ -5,22 +5,21 @@ const Header = () => {
   return (
   
       <StyledHeader>
-        <ProjectName>
+        <ProjectName to={'/'}>
           Elementary School
         </ProjectName>
         <Nav>
           <UnorderList>
           <ListItem>
-            <StyledLink to={'/'}>Home</StyledLink>
+          <StyledLink to={'/'}>Home</StyledLink>
           </ListItem>
-            <ListItem>
-            <StyledLink to={'/teacherList'}>Teachers</StyledLink>
-            </ListItem>
-            <ListItem>
-              <StyledLink to={'/studentList'}>Students</StyledLink>
-            </ListItem>
+          <ListItem>
+          <StyledLink to={'/teacherList'}>Teachers</StyledLink>
+          </ListItem>
+          <ListItem>
+          <StyledLink to={'/studentList'}>Students</StyledLink>
+          </ListItem>
           </UnorderList>
-        
         </Nav>
       </StyledHeader>
   )
